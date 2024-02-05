@@ -120,7 +120,7 @@ SRpresto <- function(FOLDER, INDEX.LAKE, INDEX.STREAM, MAXLARVAE,
 
   # color-blind friendly colors for plots
   col.spa <- 6 # blue, for spawner numbers
-  col.day <- 7 # vermillion, for staff days, changed from 2 (orange)
+  col.day <- 7 # salmon, for staff days, changed from 2 (orange)
   col.tar <- 1 # black, for target lines
   col.tfm <- 2 # orange, for TFM use, changed from 5 (yellow) as it was too hard to see
   col.bay <- 8 # reddish purple, for Bayluscide use
@@ -929,7 +929,7 @@ SRpresto <- function(FOLDER, INDEX.LAKE, INDEX.STREAM, MAXLARVAE,
   		mtext("Adult sea lamprey index  (thousands)", side=2, outer=TRUE,
         cex=1.2*mycex)
   		}
-  	figu("Index of adult sea lampreys (blue lines) and number of control field days (orange bars), TFM used (kg active ingredient; yellow bars), and Bayluscide used (kg active ingredient; purple bars). Field days, TFM, and Bayluscide are offset by 2 years (e.g., field days, TFM, and Bayluscide applied during 1985 is plotted on the 1987 spawning year, when the treatment effect would first be observed in adult sea lamprey populations).",
+  	figu("Index of adult sea lampreys (blue lines) and number of control field days (salmon colored bars), TFM used (kg active ingredient; orange bars), and Bayluscide used (kg active ingredient; purple bars). Field days, TFM, and Bayluscide are offset by 2 years (e.g., field days, TFM, and Bayluscide applied during 1985 is plotted on the 1987 spawning year, when the treatment effect would first be observed in adult sea lamprey populations).",
   	  FIG=fig, h=6, w=3.96)
 
   	para("* Treatment bullet points ...")
@@ -964,8 +964,8 @@ SRpresto <- function(FOLDER, INDEX.LAKE, INDEX.STREAM, MAXLARVAE,
   	" All rows: All metrics plotted against the sea lamprey spawning year.",
   	FIG=bigfig1, newpage="land")
 
-  figbig("Row 1: Number of control field days (orange bars).",
-  	" Row 2: TFM used (kg active ingredient, yellow bars).",
+  figbig("Row 1: Number of control field days (salmon colored bars).",
+  	" Row 2: TFM used (kg active ingredient, orange bars).",
   	" Row 3: Bayluscide used (kg active ingredient, purple bars).",
   	" All rows: Index of adult sea lampreys is shown with blue lines.",
   	" All metrics plotted against the sea lamprey spawning year.",
