@@ -426,7 +426,7 @@ SRpresto <- function(FOLDER, INDEX.LAKE, INDEX.STREAM, MAXLARVAE,
     mutate(
       stat.targ = ifelse(mean3<=target, "Met", "Above"),
       stat.trnd = case_when(
-        pval5 >= 0.05 ~ "Steady",
+        pval5 >= 0.05 ~ "Flat",  #changed from "Steady" May 2024
         slope5 > 0 ~ "Increasing",
         TRUE ~ "Decreasing"),
       status = ifelse(is.na(target), stat.trnd,
