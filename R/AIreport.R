@@ -344,13 +344,13 @@ names(prettyTAB.targs) <- c(
   TAB.lakewide1 <- with(lakeIPEs, tapply(index, list(year, lake), mean))
   colnames(TAB.lakewide1) <- Lakenames
   #Table 2 caption
-  tabl("Adult Indices, 1985-", YEAR, ". NA indicates that an index was not available due to insufficient recaptures of marked sea lamprey.",
+  tabl("Adult Indices, 1985-", YEAR, ". NA indicates that a minimum of two successful mark-recapture estimates were not achieved.",
     TAB=prettytable(TAB.lakewide1, 0))
 
   TAB.lakewide2 <- with(lakeIPEs, tapply(pe, list(year, lake), mean))
   colnames(TAB.lakewide2) <- Lakenames
   #Table 3 caption
-  tabl("Lake-wide adult sea lamprey abundances, 1985-", YEAR, ", which are based on the adult index estimates multiplied by lake-specific conversion factors (", paste(names(index2pe), as.numeric(index2pe), collapse=", "), ").  NA indicates that an index was not available due to insufficient recaptures of marked sea lamprey.",
+  tabl("Lake-wide adult sea lamprey abundances, 1985-", YEAR, ", which are based on the adult index estimates multiplied by lake-specific conversion factors (", paste(names(index2pe), as.numeric(index2pe), collapse=", "), "). NA indicates that a minimum of two successful mark-recapture estimates were not achieved.",
     TAB=prettytable(TAB.lakewide2, -3), newpage="port")
 
   #Figure 2 caption
