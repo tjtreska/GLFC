@@ -431,7 +431,7 @@ SRpresto <- function(FOLDER, INDEX.LAKE, INDEX.STREAM, MAXLARVAE,
     select(Lake, `Sea lamprey`, Marks, `Lake trout`)
 
   para("Summary: Sea lamprey control program success is measured by index estimates of adult sea lamprey abundance, sea lamprey marking rates on lake trout, and lake trout relative abundance. The overall status of these metrics in each lake is presented in the table below. The status of sea lamprey abundance and marking rates on lake trout are based on the mean over the last 3 years relative to target and trends are based on the slope over the last 5 years. Lake trout abundance is also reported using a 3-year average and 5-year trend, but there are no targets for lake trout abundance in the context of the sea lamprey control program. Single year point estimates can fluctuate and can have wide error bars, thus the focus on 3-year averages and 5-year trends.")
-#create table 1 using above code
+#create table 1 using above code, text updated May 2024 TTreska
   tabl("Status information for 3-year average values in relation to target, followed by 5-year trend direction for sea lamprey index values, lake trout marking rates and lake trout abundance metrics (only 5-year trend as no lake trout target exists). ", TAB=status.table, row.names=FALSE)  #create the first table in the document
 
 
@@ -473,7 +473,7 @@ SRpresto <- function(FOLDER, INDEX.LAKE, INDEX.STREAM, MAXLARVAE,
 
 
   attach(ALL)
-#Figure 1 creation using above plot code
+#Figure 1 creation using above plot code, text updated May 2024 TTreska
   figu("Status metrics, relative to target, for each of the Great Lakes from 2018-2023 are graphed below. For example, for Lake Huron in spawning year 2023, the 3-year average adult sea lamprey index was ~1.5 times the target, and for Lake Ontario the 3-year average 2023 marking rate was ~1.25 times the target.",
     FIG=fig, h=3.29, w=6.5)
 
