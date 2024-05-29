@@ -329,7 +329,7 @@ names(prettyTAB.targs) <- c(
   "Target",
   "Status")
 
-  tabl("The Status of whether a lake is above target is based on the mean adult index over the last 3 years.",
+  tabl( "The Status of a lake is based on the mean adult index over the last 3 years relative to Target.",
     TAB=prettyTAB.targs)
 
   extraphrase <- ""
