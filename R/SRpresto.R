@@ -251,7 +251,7 @@ SRpresto <- function(FOLDER, INDEX.LAKE, INDEX.STREAM, MAXLARVAE,
 
   #### Targets - this makes the StatusTargets.csv file ####
   #sptargyrz <- list(1994:1998, 1988:1992, 1989:1993, 1991:1995, 1993:1997)
-  #sptargyrz <- list(1994:1998, 1995:1999, 1989:1993, 1991:1995, 1993:1997)  #previous time frames
+  #sptargyrz <- list(1994:1998, 1995:1999, 1989:1993, 1991:1995, 1993:1997)  previous version
   sptargyrz <- list(1994:1998, 2015:2019, 1989:1993, 1991:1995, 1993:1997)  # this is adjustment for new Lake Michigan Target value, fall 2024
   TARGET <- data.frame(lake=1:5, wound.target=rep(c(5, 2), c(4, 1)),
     wound.units=rep(c("A1-A3", "A1"), c(4, 1)),
@@ -265,6 +265,9 @@ SRpresto <- function(FOLDER, INDEX.LAKE, INDEX.STREAM, MAXLARVAE,
   	TARGET[i, 5:6] <- mean(pick5) + c(-1, 1)*ci	# using z dist (known variance)
   	#if (i==2) TARGET[i, 4:6] <- (5/8.9)*TARGET[i, 4:6]   Since we are using real data for LM, no need to adjust anymore.
   	if (i==3) TARGET[i, 4:6] <- 0.25*TARGET[i, 4:6]
+
+  	print(pick5)
+  	print(TARGET)
   	}
   targyrz <- apply(sapply(sptargyrz, range), 2, paste, collapse="-")
   name.targ <- paste0("StatusTargets", TODAY, ".csv")
