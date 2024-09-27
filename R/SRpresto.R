@@ -247,7 +247,7 @@ SRpresto <- function(FOLDER, INDEX.LAKE, INDEX.STREAM, MAXLARVAE,
   rm(troutfiles, trouts, selcols, TROUTSUP, TROUTMIC, TROUTHUR, TROUTERI,
     TROUTONT)
 
-
+  #this is  a comment to be deleted
 
   #### Targets - this makes the StatusTargets.csv file ####
   #sptargyrz <- list(1994:1998, 1988:1992, 1989:1993, 1991:1995, 1993:1997)
@@ -268,6 +268,7 @@ SRpresto <- function(FOLDER, INDEX.LAKE, INDEX.STREAM, MAXLARVAE,
 
   	print(pick5)
   	print(TARGET)
+  	print("yeay!")
   	}
   targyrz <- apply(sapply(sptargyrz, range), 2, paste, collapse="-")
   name.targ <- paste0("StatusTargets", TODAY, ".csv")
