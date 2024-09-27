@@ -19,7 +19,7 @@
 #'   with stream mark-recapture estimates for which Adult Indices
 #'   have already been estimated (typically from previous years),
 #'   with the same variables as in \code{csvNew} plus the
-#'   previously estimated contributions \code{indexContrib} and 
+#'   previously estimated contributions \code{indexContrib} and
 #'   \code{indexContribCV}, default NULL.
 #'   See details.
 #' @param streamInfo
@@ -46,7 +46,7 @@
 #'   identifying the index streams; \code{maintain} a logical identifying the
 #'   streams that will continue to have ongoing trapping even if not part of
 #'   the Adult Index; \code{indexContrib} a numeric, the stream population
-#'   estimate that will be used in the Adult Index (NA for csvNew); 
+#'   estimate that will be used in the Adult Index (NA for csvNew);
 #'   \code{indexContribCV} a numeric, the stream CV that will be used to
 #'   generate 95\% confidence intervals for the Adult Index (NA for new); and
 #'   \code{complete} a logical identifying streams and years for which the
@@ -54,44 +54,50 @@
 #' @importFrom plyr rbind.fill
 #' @export
 
-AIprep <- function(csvDir, csvNew, csvOld=NULL, streamInfo=trappedStreams,
-  indexStreams=lsIndex, keepStreams=lsKeep) {
-
+AIprep <- function(
+    csvDir, csvNew, csvOld = NULL, streamInfo = trappedStreams,
+    indexStreams = lsIndex, keepStreams = lsKeep) {
   if (length(indexStreams) > length(unique(indexStreams))) {
     stop("indexStreams should be unique (without duplicates).")
   }
 
   varShort <- c("year", "lake", "lscode", "PEmr", "CVmr")
-  varLong <- c("year", "lake", "lscode", "PEmr", "CVmr", 
-    "indexContrib", "indexContribCV")
+  varLong <- c(
+    "year", "lake", "lscode", "PEmr", "CVmr",
+    "indexContrib", "indexContribCV"
+  )
 
   # bring in this year's stream data
 
-  strnew <- read.csv(paste(csvDir, csvNew, sep="\\"), as.is=TRUE, header=TRUE)
+  strnew <- read.csv(paste(csvDir, csvNew, sep = "\\"), as.is = TRUE, header = TRUE)
   # identify index streams and streams with maintained trapping operations
   strnew$index <- with(strnew, lscode %in% unlist(indexStreams))
   strnew$maintain <- with(strnew, lscode %in% unlist(keepStreams))
   strnew$complete <- FALSE
 
   if (any(is.na(match(varShort, names(strnew))))) {
-    stop(csvNew, "must include these variables:",
-      paste(varShort, collapse=", "), ".")
+    stop(
+      csvNew, "must include these variables:",
+      paste(varShort, collapse = ", "), "."
+    )
   }
 
   a <- with(strnew, table(paste(year, lscode)))
-  if (sum(a>1)>1) {
+  if (sum(a > 1) > 1) {
     stop("strnew should have only one row for each year-lscode combination.")
   }
 
   # bring in the old stream data
 
   if (!is.null(csvOld)) {
-    strold <- read.csv(paste(csvDir, csvOld, sep="\\"), as.is=TRUE, header=TRUE)
+    strold <- read.csv(paste(csvDir, csvOld, sep = "\\"), as.is = TRUE, header = TRUE)
     strold$complete <- TRUE
 
     if (any(is.na(match(varLong, names(strold))))) {
-      stop(csvOld, "(if not NULL) must include these variables:",
-        paste(varLong, collapse=", "), ".")
+      stop(
+        csvOld, "(if not NULL) must include these variables:",
+        paste(varLong, collapse = ", "), "."
+      )
     }
 
     # combine the previous data with the current data
@@ -101,22 +107,24 @@ AIprep <- function(csvDir, csvNew, csvOld=NULL, streamInfo=trappedStreams,
   }
 
   a <- with(streamPE, table(paste(year, lscode)))
-  if (any(a>1)) {
-    stop(paste("No year-lscode combinations should be repeated,",
-    paste(names(a[a>1]), collapse=", ")))
+  if (any(a > 1)) {
+    stop(paste(
+      "No year-lscode combinations should be repeated,",
+      paste(names(a[a > 1]), collapse = ", ")
+    ))
   }
 
   a <- with(streamPE, is.na(lake) | is.na(lscode) |
-      !is.element(year, 1970:2050) |
-      (!is.na(PEmr) & PEmr<0) | (!is.na(CVmr) & CVmr<0))
-  if (sum(a)>0) {
+    !is.element(year, 1970:2050) |
+    (!is.na(PEmr) & PEmr < 0) | (!is.na(CVmr) & CVmr < 0))
+  if (sum(a) > 0) {
     stop("Invalid value(s) for lake, lscode, year, PEmr, or CVmr.")
   }
 
   # replace all the general information with info from streamInfo
   if (!is.null(streamInfo)) {
-  replace <- names(streamInfo)[names(streamInfo)!="lscode"]
-  streamPE <- merge(streamPE[, !(names(streamPE) %in% replace)], streamInfo)
+    replace <- names(streamInfo)[names(streamInfo) != "lscode"]
+    streamPE <- merge(streamPE[, !(names(streamPE) %in% replace)], streamInfo)
   }
 
   streamPE <- streamPE[with(streamPE, order(lscode, year)), ]

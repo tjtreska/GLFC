@@ -32,16 +32,16 @@
 #'   Great Lake, with 2 columns: \code{lake} and \code{targInd}.
 #' @export
 
-AItarget <- function(lakeIndex,
-  years=list(1994:1998, 2015:2019, 1989:1993, 1991:1995, 1993:1997),
-  adjust=c(1, 1, 0.25, 1, 1)) {
+AItarget <- function(
+    lakeIndex,
+    years = list(1994:1998, 2015:2019, 1989:1993, 1991:1995, 1993:1997),
+    adjust = c(1, 1, 0.25, 1, 1)) {
+  targ <- data.frame(lake = 1:5, targInd = rep(NA, 5))
 
-  targ <- data.frame(lake=1:5, targInd=rep(NA, 5))
-
-  for(i in 1:5) {
-    pick5 <- lakeIndex$lake==i & is.element(lakeIndex$year, years[[i]])
-    targ$targInd[i] <- mean(lakeIndex$index[pick5])*adjust[i]
-    }
+  for (i in 1:5) {
+    pick5 <- lakeIndex$lake == i & is.element(lakeIndex$year, years[[i]])
+    targ$targInd[i] <- mean(lakeIndex$index[pick5]) * adjust[i]
+  }
 
   targ
 }

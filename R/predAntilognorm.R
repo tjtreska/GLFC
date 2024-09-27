@@ -21,13 +21,12 @@
 #'  Introduction to the Theory of Statistics.
 #'  McGraw-Hill, New York.
 #' @examples
-#' fit <- aov(log(yield) ~ block + N * P + K, data=npk)
+#' fit <- aov(log(yield) ~ block + N * P + K, data = npk)
 #' predAntilognorm(fit, npk)
-
-predAntilognorm <- function(modfit, xdata, k=0) {
+predAntilognorm <- function(modfit, xdata, k = 0) {
   sigma2 <- sigma(modfit)^2
-  mu <- predict(modfit, newdata=xdata)
-  pred <- exp(mu + sigma2/2) - k
-  varpred <- exp(2*mu + 2*sigma2) - exp(2*mu + sigma2)
-  list(pred=pred, sdpred=sqrt(varpred))
+  mu <- predict(modfit, newdata = xdata)
+  pred <- exp(mu + sigma2 / 2) - k
+  varpred <- exp(2 * mu + 2 * sigma2) - exp(2 * mu + sigma2)
+  list(pred = pred, sdpred = sqrt(varpred))
 }

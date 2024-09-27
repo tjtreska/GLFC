@@ -52,24 +52,24 @@
 #' @import maps
 #' @export
 #'
-AIreport <- function(streamPEs, lakeIPEs, targets, csvDir, outFile=NULL,
-  proptargets=NULL) {
-
-# library(GLFC)
-# library(maps)
-# library(tidyr)
-# library(dplyr)
-# streamPEs=streamPE
-# lakeIPEs=lakeIndPE
-# targets=oldtarg
-# csvDir=DIRECTORY
-# outFile="TestReport"
-# proptargets=NULL
+AIreport <- function(
+    streamPEs, lakeIPEs, targets, csvDir, outFile = NULL,
+    proptargets = NULL) {
+  # library(GLFC)
+  # library(maps)
+  # library(tidyr)
+  # library(dplyr)
+  # streamPEs=streamPE
+  # lakeIPEs=lakeIndPE
+  # targets=oldtarg
+  # csvDir=DIRECTORY
+  # outFile="TestReport"
+  # proptargets=NULL
 
   YEAR <- max(streamPEs$year)
 
   if (is.null(outFile)) {
-    outFile  <- paste(YEAR, "Adult Index - draft report.doc")
+    outFile <- paste(YEAR, "Adult Index - draft report.doc")
   }
 
   # calculate three-year running mean (moving average) for adult index
@@ -77,54 +77,60 @@ AIreport <- function(streamPEs, lakeIPEs, targets, csvDir, outFile=NULL,
     group_by(lake) %>%
     arrange(lake, year) %>%
     mutate(
-      lag1=lag(index, 1),
-      lag2=lag(index, 2),
-      nrun= (!is.na(index)) + (!is.na(lag1)) + (!is.na(lag2))
+      lag1 = lag(index, 1),
+      lag2 = lag(index, 2),
+      nrun = (!is.na(index)) + (!is.na(lag1)) + (!is.na(lag2))
     )
-  fullrun3 <- rowMeans(look[, c("index", "lag1", "lag2")], na.rm=TRUE)
-  look$index.3mn <- ifelse(look$nrun<2, NA, fullrun3)
+  fullrun3 <- rowMeans(look[, c("index", "lag1", "lag2")], na.rm = TRUE)
+  look$index.3mn <- ifelse(look$nrun < 2, NA, fullrun3)
   lakeIPEs <- look
 
   # Table 1: create nice looking table with latest year of estimates and targets
   targ2 <- lakeIPEs %>%
-    filter(year==YEAR) %>%
+    filter(year == YEAR) %>%
     full_join(targets) %>%
     mutate(
       Lake = Lakenames[lake],
       Status = ifelse(index.3mn <= targInd, "Less than", "Greater than")
     ) %>%
     ungroup() %>%
-    select(Lake, index, index.3mn, Target=targInd, Status)
+    select(Lake, index, index.3mn, Target = targInd, Status)
   TAB.targs <- prettytable(as.data.frame(targ2), 0)
 
   # Figure 1: plot lake-wide totals w/ confidence intervals on different scales
-  FIG.lakeCI <- function(lakeids=1:5, k=index2pe) {
+  FIG.lakeCI <- function(lakeids = 1:5, k = index2pe) {
     with(lakeIPEs, {
-      par(mfrow=c(3, 2), mar=c(3, 3, 2, 3), oma=c(2, 2, 0, 2), cex=1)
-      for(i in seq(lakeids)) {
+      par(mfrow = c(3, 2), mar = c(3, 3, 2, 3), oma = c(2, 2, 0, 2), cex = 1)
+      for (i in seq(lakeids)) {
         j <- lakeids[i]
-        sel <- lake==j
-        mymax <- max(ihi[sel & year>=1985], na.rm=TRUE)/1000
-        plot(1, 1, type="n", xlim=range(year), ylim=c(0, mymax),
-          xlab="", ylab="", main=Lakenames[i], las=1)
-        abline(h=targets$targInd[j]/1000, lty=2)
-        if(!is.null(proptargets)) {
-          abline(h=proptargets$targInd[proptargets$lake==j]/1000,
-            col="darkgray", lwd=2, lty=2)
+        sel <- lake == j
+        mymax <- max(ihi[sel & year >= 1985], na.rm = TRUE) / 1000
+        plot(1, 1,
+          type = "n", xlim = range(year), ylim = c(0, mymax),
+          xlab = "", ylab = "", main = Lakenames[i], las = 1
+        )
+        abline(h = targets$targInd[j] / 1000, lty = 2)
+        if (!is.null(proptargets)) {
+          abline(
+            h = proptargets$targInd[proptargets$lake == j] / 1000,
+            col = "darkgray", lwd = 2, lty = 2
+          )
         }
-        lines(year[sel], index.3mn[sel]/1000, col="#fb8072", lwd=2)
-        arrows(year[sel], ilo[sel]/1000, year[sel], ihi[sel]/1000, length=0.03,
-          angle=90, code=3, col="darkgray")
-        points(year[sel], index[sel]/1000)
-        p4 <- pretty(k[i]*c(0, mymax))
-        axis(4, at=p4/k[i], labels=p4, las=1)
-        if (i==1) {
+        lines(year[sel], index.3mn[sel] / 1000, col = "#fb8072", lwd = 2)
+        arrows(year[sel], ilo[sel] / 1000, year[sel], ihi[sel] / 1000,
+          length = 0.03,
+          angle = 90, code = 3, col = "darkgray"
+        )
+        points(year[sel], index[sel] / 1000)
+        p4 <- pretty(k[i] * c(0, mymax))
+        axis(4, at = p4 / k[i], labels = p4, las = 1)
+        if (i == 1) {
           frame()
         }
       }
-      mtext("Year", outer=TRUE, side=1, cex=1.4)
-      mtext("Adult index  (thousands)", outer=TRUE, side=2, cex=1.4)
-      mtext("Lake-wide adult abundance  (thousands)", outer=TRUE, side=4, cex=1.4)
+      mtext("Year", outer = TRUE, side = 1, cex = 1.4)
+      mtext("Adult index  (thousands)", outer = TRUE, side = 2, cex = 1.4)
+      mtext("Lake-wide adult abundance  (thousands)", outer = TRUE, side = 4, cex = 1.4)
     })
   }
 
@@ -136,32 +142,38 @@ AIreport <- function(streamPEs, lakeIPEs, targets, csvDir, outFile=NULL,
   streamPEs$categ[with(streamPEs, index & is.na(PEmr))] <-
     "Modeled - Index w/o mark-recap"
 
-  streamPEs$cle <- with(streamPEs,
-    paste(casefold(substring(country, 1, 2), upper=TRUE),
-      Lakeabbs[lake], estr, sep=" - "))
+  streamPEs$cle <- with(
+    streamPEs,
+    paste(casefold(substring(country, 1, 2), upper = TRUE),
+      Lakeabbs[lake], estr,
+      sep = " - "
+    )
+  )
 
   streamPEs$cleplus <- with(streamPEs, paste(
-    paste(cle, strname, sep="  "),
-    paste("    ", format(round(indexContrib), big.mark=",")), sep="\n"))
+    paste(cle, strname, sep = "  "),
+    paste("    ", format(round(indexContrib), big.mark = ",")),
+    sep = "\n"
+  ))
 
-#     df=streamPEs[streamPEs$year==YEAR, ]
-#     group="categ"
-#     var="indexContrib"
-#     lab="cleplus"
-#     sug=c("Index w/ mark-recap", "Modeled - Index w/o mark-recap", "Non-index")
-#     cols=blindcolz[1+(1:length(sug))]
-#     legat="topright"
-#     leginset=c(0, 0)
-#     dr=range(sqrt(df[, var]), na.rm=TRUE)
-#     cr=c(0.04, 0.5)
-#     ox=-44
-#     oy=64
+  #     df=streamPEs[streamPEs$year==YEAR, ]
+  #     group="categ"
+  #     var="indexContrib"
+  #     lab="cleplus"
+  #     sug=c("Index w/ mark-recap", "Modeled - Index w/o mark-recap", "Non-index")
+  #     cols=blindcolz[1+(1:length(sug))]
+  #     legat="topright"
+  #     leginset=c(0, 0)
+  #     dr=range(sqrt(df[, var]), na.rm=TRUE)
+  #     cr=c(0.04, 0.5)
+  #     ox=-44
+  #     oy=64
 
-  FIG.bubble1 <- function(df, group, var, lab, sug,
-    cols=blindcolz[1:length(sug)], lonR=-c(92.14, 75.97),
-    latR=c(41.36, 49.02), legat="topright", leginset=c(0, 0),
-    dr=range(sqrt(df[, var]), na.rm=TRUE), cr=c(0.04, 0.25), ox=-44, oy=64) {
-
+  FIG.bubble1 <- function(
+      df, group, var, lab, sug,
+      cols = blindcolz[1:length(sug)], lonR = -c(92.14, 75.97),
+      latR = c(41.36, 49.02), legat = "topright", leginset = c(0, 0),
+      dr = range(sqrt(df[, var]), na.rm = TRUE), cr = c(0.04, 0.25), ox = -44, oy = 64) {
     g <- df[, group]
     v <- df[, var]
     n <- length(g)
@@ -170,84 +182,105 @@ AIreport <- function(streamPEs, lakeIPEs, targets, csvDir, outFile=NULL,
     yr <- latR
     xrw <- diff(xr)
     yrw <- diff(yr)
-    bufx <- xrw/40
-    bufy <- yrw/40
+    bufx <- xrw / 40
+    bufy <- yrw / 40
 
     magic <- 20
-    par(mar=c(0, 0, 0, 0))
-    maps::map("world", type="n", xlim=xr + c(-1, 1)*bufx,
-      ylim=yr + c(-magic, 1)*bufy, mar=c(0, 0, 0, 0))
-    maps::map("lakes", col="deepskyblue", add=TRUE, fill=TRUE)
+    par(mar = c(0, 0, 0, 0))
+    maps::map("world",
+      type = "n", xlim = xr + c(-1, 1) * bufx,
+      ylim = yr + c(-magic, 1) * bufy, mar = c(0, 0, 0, 0)
+    )
+    maps::map("lakes", col = "deepskyblue", add = TRUE, fill = TRUE)
     pusr <- par("usr")
     with(df, {
       textx <- rep(NA, dim(df)[1])
       textx <- seq(pusr[1], pusr[2],
-        length=n+2)[-c(1, n+2)][rank(long, ties.method="first")]
+        length = n + 2
+      )[-c(1, n + 2)][rank(long, ties.method = "first")]
 
-      for(i in seq_along(sug)) {
-        sel <- g==sug[i]
-        if (sum(sel)>0) {
-          circles(long[sel], lat[sel], sqrt(v)[sel], data.range=dr,
-            circle.size.range=cr, outx=ox, outy=oy, add=TRUE, fg=cols[i], lwd=3)
-          text(textx[sel], yr[1] - (magic-1)*bufy, df[sel, lab],
-            adj=0, srt=90, col=cols[i], cex=0.8)
-          segments(textx[sel], yr[1] - 2*bufy, long[sel], lat[sel], col=cols[i],
-            lty=2)
+      for (i in seq_along(sug)) {
+        sel <- g == sug[i]
+        if (sum(sel) > 0) {
+          circles(long[sel], lat[sel], sqrt(v)[sel],
+            data.range = dr,
+            circle.size.range = cr, outx = ox, outy = oy, add = TRUE, fg = cols[i], lwd = 3
+          )
+          text(textx[sel], yr[1] - (magic - 1) * bufy, df[sel, lab],
+            adj = 0, srt = 90, col = cols[i], cex = 0.8
+          )
+          segments(textx[sel], yr[1] - 2 * bufy, long[sel], lat[sel],
+            col = cols[i],
+            lty = 2
+          )
         }
       }
     })
 
-    par(xpd=NA)
-    legend(legat, sug, col=cols, lwd=3, bty="n", inset=leginset, cex=1.4)
+    par(xpd = NA)
+    legend(legat, sug, col = cols, lwd = 3, bty = "n", inset = leginset, cex = 1.4)
   }
 
   FIG.bubble2 <- function() {
     FIG.bubble1(
-      df=streamPEs[streamPEs$year==YEAR & streamPEs$categ!="Non-index", ],
-      group="categ", var="indexContrib", lab="cleplus",
-      sug=c("Index w/ mark-recap", "Modeled - Index w/o mark-recap"))
+      df = streamPEs[streamPEs$year == YEAR & streamPEs$categ != "Non-index", ],
+      group = "categ", var = "indexContrib", lab = "cleplus",
+      sug = c("Index w/ mark-recap", "Modeled - Index w/o mark-recap")
+    )
   }
 
   ### Figure 2: bar plot of individual index stream PEs
   outcex <- 1.2
   YEARb <- 1995
-  col7 <- c("#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462",
-    "#b3de69")
+  col7 <- c(
+    "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462",
+    "#b3de69"
+  )
   FIG.bar <- function() {
-    par(mar=c(2.5, 2.5, 1, 1), mfrow=c(3, 2), yaxs="i", oma=c(1.5, 1.5, 0, 0),
-      cex=1.2)
-    for(i in 1:5) {
-      mystreamdf <- with(streamPEs,
-        streamPEs[lake==i & index==TRUE & year >= YEARb, ])
-      p <- with(mystreamdf,
-        tapply(indexContrib, list(year, substring(strname, 1, 10)), mean))
-      p <- p[, rev(order(apply(p, 2, median, na.rm=TRUE)))]
+    par(
+      mar = c(2.5, 2.5, 1, 1), mfrow = c(3, 2), yaxs = "i", oma = c(1.5, 1.5, 0, 0),
+      cex = 1.2
+    )
+    for (i in 1:5) {
+      mystreamdf <- with(
+        streamPEs,
+        streamPEs[lake == i & index == TRUE & year >= YEARb, ]
+      )
+      p <- with(
+        mystreamdf,
+        tapply(indexContrib, list(year, substring(strname, 1, 10)), mean)
+      )
+      p <- p[, rev(order(apply(p, 2, median, na.rm = TRUE)))]
       yrz <- as.numeric(dimnames(p)[[1]])
       pyrz <- pretty(yrz)
-      a <- barplot(t(p)/1000, las=1, col=col7, axes=FALSE,
-        names.arg=rep("", dim(p)[1]),
-        ylim=1.03*c(0, max(apply(p, 1, sum, na.rm=TRUE)))/1000,
-        xlab="", ylab="", main=Lakenames[i], border=NA)
-      abline(h=targets$targInd[i]/1000)
-      if(!is.null(proptargets)) {
-        abline(h=proptargets$targInd[proptargets$lake==i]/1000, lty=2)
+      a <- barplot(t(p) / 1000,
+        las = 1, col = col7, axes = FALSE,
+        names.arg = rep("", dim(p)[1]),
+        ylim = 1.03 * c(0, max(apply(p, 1, sum, na.rm = TRUE))) / 1000,
+        xlab = "", ylab = "", main = Lakenames[i], border = NA
+      )
+      abline(h = targets$targInd[i] / 1000)
+      if (!is.null(proptargets)) {
+        abline(h = proptargets$targInd[proptargets$lake == i] / 1000, lty = 2)
       }
-      axis(1, at=a[match(pyrz, yrz)], pyrz)
-      axis(2, las=1)
+      axis(1, at = a[match(pyrz, yrz)], pyrz)
+      axis(2, las = 1)
       box()
-      legend("topleft", rev(colnames(p)), fill=rev(col7[1:dim(p)[2]]), cex=0.5,
-        bty="n", border=NA)
-      if (i==1) {
+      legend("topleft", rev(colnames(p)),
+        fill = rev(col7[1:dim(p)[2]]), cex = 0.5,
+        bty = "n", border = NA
+      )
+      if (i == 1) {
         frame()
-        }
       }
-    mtext("Year", outer=TRUE, side=1, cex=outcex)
-    mtext("Adult Index  (thousands)", outer=TRUE, side=2, cex=outcex)
     }
+    mtext("Year", outer = TRUE, side = 1, cex = outcex)
+    mtext("Adult Index  (thousands)", outer = TRUE, side = 2, cex = outcex)
+  }
 
 
   # create a file for the draft report
-  doc <<- startrtf(file=outFile, dir=csvDir)
+  doc <<- startrtf(file = outFile, dir = csvDir)
 
   heading("D R A F T")
   heading(paste0(YEAR, " Lake-Wide Adult Sea Lamprey Index"))
@@ -257,43 +290,46 @@ AIreport <- function(streamPEs, lakeIPEs, targets, csvDir, outFile=NULL,
   para("<<<  This is a rough draft to be used as a starting point in creating the final report.  First, save the document as a *.docx Word file (even though it has a *.doc file extension already, it's really just an *.rtf file). Then, select all text in the document (Ctrl-a) and increase the font size to 12. Finally, delete this paragraph, add author names, edit text and insert/delete page breaks as needed.  >>>")
 
   # merge this year and last years' estimates
-  both <- merge(lakeIPEs[lakeIPEs$year==YEAR-1, ],
-    lakeIPEs[lakeIPEs$year==YEAR, ],
-    by="lake", suffixes = c(".last",".this"), all=TRUE)
+  both <- merge(lakeIPEs[lakeIPEs$year == YEAR - 1, ],
+    lakeIPEs[lakeIPEs$year == YEAR, ],
+    by = "lake", suffixes = c(".last", ".this"), all = TRUE
+  )
 
   thyr <- round(both$index.this)
   layr <- round(both$index.last)
   hier <- with(both, ilo.this > ihi.last)
   loer <- with(both, ihi.this < ilo.last)
   phrase <- rep("not significantly different from", 5)
-  delta <- with(both, round(100*abs(index.this - index.last) / index.last))
+  delta <- with(both, round(100 * abs(index.this - index.last) / index.last))
 
   phrase[is.na(hier)] <- "not comparable to"
   phrase[!is.na(hier) & hier] <-
     paste0(delta[!is.na(hier) & hier], "% higher than")
   phrase[!is.na(hier) & loer] <-
     paste0(delta[!is.na(hier) & loer], "% lower than")
-  abta <- sum(targ2$Status=="Greater than")
-  beta <- sum(targ2$Status=="Less than")
+  abta <- sum(targ2$Status == "Greater than")
+  beta <- sum(targ2$Status == "Less than")
 
   insert1 <- ""
   insert2 <- ""
-  if (abta>0) {
+  if (abta > 0) {
     insert1 <-
-      paste(targ2$Lake[targ2$Status=="Greater than"], collapse=", ")
+      paste(targ2$Lake[targ2$Status == "Greater than"], collapse = ", ")
   }
-  if (beta>0) {
+  if (beta > 0) {
     insert2 <-
-      paste(targ2$Lake[targ2$Status=="Less than"], collapse=", ")
+      paste(targ2$Lake[targ2$Status == "Less than"], collapse = ", ")
   }
-  para("The index of adult sea lamprey abundance is estimated annually for each Great Lake. Based on the mean over the last 3 years (", YEAR-2, "-", YEAR, "), lakes ", insert2, " were less than the targets and lakes ", insert1, " were greater than the targets (Table 1, Figure 1).  Index targets were determined for each lake as average abundance observed during a 5-year period when wounding rates were at an acceptable level. Adult sea lamprey indices and lake-wide abundances from 1985 to ", YEAR, " are reported in Tables 2 and 3.")
+  para("The index of adult sea lamprey abundance is estimated annually for each Great Lake. Based on the mean over the last 3 years (", YEAR - 2, "-", YEAR, "), lakes ", insert2, " were less than the targets and lakes ", insert1, " were greater than the targets (Table 1, Figure 1).  Index targets were determined for each lake as average abundance observed during a 5-year period when wounding rates were at an acceptable level. Adult sea lamprey indices and lake-wide abundances from 1985 to ", YEAR, " are reported in Tables 2 and 3.")
 
-  if(!is.null(proptargets)) {
+  if (!is.null(proptargets)) {
     ptl <- proptargets
-    ptl$targInd <- format(round(ptl$targInd), big.mark=",")
+    ptl$targInd <- format(round(ptl$targInd), big.mark = ",")
     ptl <- split(ptl, ptl$lake)
     pttext <- paste0(Lakenames[as.numeric(names(ptl))], ": ",
-      lapply(ptl, function(df) paste(df$targInd, collapse=", ")), collapse="; ")
+      lapply(ptl, function(df) paste(df$targInd, collapse = ", ")),
+      collapse = "; "
+    )
     para("In addition to the accepted targets, there are also the following proposed targets, ", pttext, ".  <<< Explain further. >>>")
   }
 
@@ -303,65 +339,73 @@ AIreport <- function(streamPEs, lakeIPEs, targets, csvDir, outFile=NULL,
   sel1 <- !is.na(hier) & loer
   sel2 <- !is.na(hier) & !hier & !loer
   sel3 <- !is.na(hier) & hier
-  if (sum(sel1)>0) {
-    insert1 <- paste(Lakenames[both$lake[sel1]], collapse=", ")
+  if (sum(sel1) > 0) {
+    insert1 <- paste(Lakenames[both$lake[sel1]], collapse = ", ")
   }
-  if (sum(sel2)>0) {
-    insert2 <- paste(Lakenames[both$lake[sel2]], collapse=", ")
+  if (sum(sel2) > 0) {
+    insert2 <- paste(Lakenames[both$lake[sel2]], collapse = ", ")
   }
-  if (sum(sel3)>0) {
-    insert3 <- paste(Lakenames[both$lake[sel3]], collapse=", ")
+  if (sum(sel3) > 0) {
+    insert3 <- paste(Lakenames[both$lake[sel3]], collapse = ", ")
   }
-  para("Comparing the 95% confidence intervals of the single year ", YEAR, " estimates with those in ", YEAR-1, ", the number of adults significantly decreased in lakes ", insert1, "; remained the same in lakes ", insert2, "; and significantly increased in lakes ", insert3, " (Figure 1).")
+  para("Comparing the 95% confidence intervals of the single year ", YEAR, " estimates with those in ", YEAR - 1, ", the number of adults significantly decreased in lakes ", insert1, "; remained the same in lakes ", insert2, "; and significantly increased in lakes ", insert3, " (Figure 1).")
 
   para("The contribution from individual streams to the adult index is shown in Figure 2.")
 
-  misspe <- sum(with(streamPEs, index==TRUE & year==YEAR &
-      (is.na(PEmr) | is.na(CVmr))))
-  allstr <- sum(with(streamPEs, index==TRUE & year==YEAR))
-  para("The distribution of the ", YEAR, " stream estimates around the Great Lakes is shown in Figure 3.  Mark-recapture estimates of adult sea lamprey abundance were available for ", allstr-misspe, " of the ", allstr, " index streams.")
+  misspe <- sum(with(streamPEs, index == TRUE & year == YEAR &
+    (is.na(PEmr) | is.na(CVmr))))
+  allstr <- sum(with(streamPEs, index == TRUE & year == YEAR))
+  para("The distribution of the ", YEAR, " stream estimates around the Great Lakes is shown in Figure 3.  Mark-recapture estimates of adult sea lamprey abundance were available for ", allstr - misspe, " of the ", allstr, " index streams.")
 
-prettyTAB.targs <- TAB.targs
-names(prettyTAB.targs) <- c(
-  "Lake",
-  paste0(YEAR, "\nindex"),
-  paste0(YEAR-2, "-", YEAR, "\n mean index"),
-  "Target",
-  "Status")
+  prettyTAB.targs <- TAB.targs
+  names(prettyTAB.targs) <- c(
+    "Lake",
+    paste0(YEAR, "\nindex"),
+    paste0(YEAR - 2, "-", YEAR, "\n mean index"),
+    "Target",
+    "Status"
+  )
 
-  tabl( "The Status of a lake is based on the mean adult index over the last 3 years relative to Target.",
-    TAB=prettyTAB.targs)
+  tabl("The Status of a lake is based on the mean adult index over the last 3 years relative to Target.",
+    TAB = prettyTAB.targs
+  )
 
   extraphrase <- ""
-  if(!is.null(proptargets)) {
+  if (!is.null(proptargets)) {
     extraphrase <- "  Dashed horizontal lines represent proposed targets."
   }
 
-  #Figure 1 caption
+  # Figure 1 caption
   figu("Adult index values for each Great Lake through ", YEAR, ", with 3-year averages shown as red lines.  Individual estimates with 95% confidence intervals are shown in gray.  Targets are represented by the dashed horizontal lines.", extraphrase,
-    FIG=FIG.lakeCI, newpage="port")#, w=6.5, h=7.5)
+    FIG = FIG.lakeCI, newpage = "port"
+  ) # , w=6.5, h=7.5)
 
   TAB.lakewide1 <- with(lakeIPEs, tapply(index, list(year, lake), mean))
   colnames(TAB.lakewide1) <- Lakenames
-  #Table 2 caption
+  # Table 2 caption
   tabl("Adult Indices, 1985-", YEAR, ". NA indicates that a minimum of two successful mark-recapture estimates were not achieved.",
-    TAB=prettytable(TAB.lakewide1, 0))
+    TAB = prettytable(TAB.lakewide1, 0)
+  )
 
   TAB.lakewide2 <- with(lakeIPEs, tapply(pe, list(year, lake), mean))
   colnames(TAB.lakewide2) <- Lakenames
-  #Table 3 caption
-  tabl("Lake-wide adult sea lamprey abundances, 1985-", YEAR, ", which are based on the adult index estimates multiplied by lake-specific conversion factors (", paste(names(index2pe), as.numeric(index2pe), collapse=", "), "). NA indicates that a minimum of two successful mark-recapture estimates were not achieved.",
-    TAB=prettytable(TAB.lakewide2, -3), newpage="port")
+  # Table 3 caption
+  tabl("Lake-wide adult sea lamprey abundances, 1985-", YEAR, ", which are based on the adult index estimates multiplied by lake-specific conversion factors (", paste(names(index2pe), as.numeric(index2pe), collapse = ", "), "). NA indicates that a minimum of two successful mark-recapture estimates were not achieved.",
+    TAB = prettytable(TAB.lakewide2, -3), newpage = "port"
+  )
 
-  #Figure 2 caption
+  # Figure 2 caption
   figu("Adult sea lamprey abundance estimates for index streams.  Targets are represented by the horizontal black lines. Streams may not always have an estimate in all years due to insufficient recaptures of marked sea lamprey.", extraphrase,
-    FIG=FIG.bar, newpage="port", w=6, h=7.5)
+    FIG = FIG.bar, newpage = "port", w = 6, h = 7.5
+  )
 
-  #Figure 3 caption
+  # Figure 3 caption
   figu("Relative size of adult sea lamprey population estimates in Great Lakes index streams, ", YEAR, ".  Circle size represents size of population estimate, circle color represents the method of index calculation.",
-    FIG=FIG.bubble2, newpage="land", h=5.7)
+    FIG = FIG.bubble2, newpage = "land", h = 5.7
+  )
 
 
   endrtf()
 
-}
+  # print figures for use outside of the report
+} # end AIreport function

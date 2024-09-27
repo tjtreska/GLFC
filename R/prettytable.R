@@ -27,9 +27,9 @@
 #' head(mtcars)
 #' prettytable(head(mtcars))
 #'
-prettytable <- function(df, digits=2, rounds=TRUE, bigseps=",") {
+prettytable <- function(df, digits = 2, rounds = TRUE, bigseps = ",") {
   lengthen <- function(y, n) {
-    if (length(y)<2) rep(y, n) else y
+    if (length(y) < 2) rep(y, n) else y
   }
   formatnum <- function(x, dig., round., bigsep.) {
     if (is.integer(x) | is.numeric(x)) {
@@ -40,12 +40,12 @@ prettytable <- function(df, digits=2, rounds=TRUE, bigseps=",") {
         if (round.) {
           x2 <- round(x, dig.)
           decdig <- dig.
-          decdig[decdig<0] <- 0
+          decdig[decdig < 0] <- 0
         } else {
           x2 <- signif(x, dig.)
         }
       }
-      return(format(x2, big.mark=bigsep., nsmall=decdig))
+      return(format(x2, big.mark = bigsep., nsmall = decdig))
     } else {
       return(x)
     }
@@ -55,8 +55,8 @@ prettytable <- function(df, digits=2, rounds=TRUE, bigseps=",") {
   r <- lengthen(rounds, N)
   b <- lengthen(bigseps, N)
   df2 <- df
-  for(i in 1:N) {
-    df2[, i] <- formatnum(x=df[, i], dig.=d[i], round.=r[i], bigsep.=b[i])
+  for (i in 1:N) {
+    df2[, i] <- formatnum(x = df[, i], dig. = d[i], round. = r[i], bigsep. = b[i])
   }
   df2
 }

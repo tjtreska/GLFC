@@ -63,20 +63,19 @@
 #' @export
 #' @examples
 #' \dontrun{
-#'  library(GLFC)
-#'  AIpresto(
-#'    DIRECTORY = "C:\\TrappingData\\2015",
-#'    NEWDATARAW = "TrapCatchEstimate2015.csv",
-#'    STREAMDATAPREV = "AdultStreamThru2014.csv",
-#'    LAKEDATAPREV = "AdultLakeThru2014.csv")
+#' library(GLFC)
+#' AIpresto(
+#'   DIRECTORY = "C:\\TrappingData\\2015",
+#'   NEWDATARAW = "TrapCatchEstimate2015.csv",
+#'   STREAMDATAPREV = "AdultStreamThru2014.csv",
+#'   LAKEDATAPREV = "AdultLakeThru2014.csv"
+#' )
 #' }
-
 AIpresto <- function(DIRECTORY, NEWDATARAW, STREAMDATAPREV, LAKEDATAPREV) {
-
   # make sure all needed packages are installed
   wantpkgs <- c("geosphere", "lubridate", "maps", "plotrix", "plyr", "rtf")
   needpkgs <- setdiff(wantpkgs, row.names(installed.packages()))
-  if(length(needpkgs) > 0) install.packages(needpkgs)
+  if (length(needpkgs) > 0) install.packages(needpkgs)
 
   githubver()
 
@@ -84,7 +83,7 @@ AIpresto <- function(DIRECTORY, NEWDATARAW, STREAMDATAPREV, LAKEDATAPREV) {
 
   # Prepare csv file with stream mark-recapture estimates
   # Header must include: year, lake, lscode, PEmr, CVmr
-  new <- read.csv(paste(DIRECTORY, NEWDATARAW, sep="\\"), as.is=TRUE)
+  new <- read.csv(paste(DIRECTORY, NEWDATARAW, sep = "\\"), as.is = TRUE)
 
   YEAR <- max(new$year)
 
@@ -92,35 +91,44 @@ AIpresto <- function(DIRECTORY, NEWDATARAW, STREAMDATAPREV, LAKEDATAPREV) {
 
   # dates of the input files being used
   ins <- c(LAKEDATAPREV, STREAMDATAPREV, NEWDATARAW)
-  dins <- paste(DIRECTORY, ins, sep="\\")
+  dins <- paste(DIRECTORY, ins, sep = "\\")
   finfo <- lapply(dins, function(x) file.info(x)$mtime)
   tabinfiles <- as.matrix(data.frame(
-    inputs=c("LAKEDATAPREV", "STREAMDATAPREV", "NEWDATARAW"),
-    files=ins, date.modified=do.call(c, finfo)))
+    inputs = c("LAKEDATAPREV", "STREAMDATAPREV", "NEWDATARAW"),
+    files = ins, date.modified = do.call(c, finfo)
+  ))
   tabinfiles <- apply(tabinfiles, 2, format)
 
   # index and maintenance streams for each lake
-  tabstreams <- as.matrix(data.frame(lake=Lakenames,
-    index=sapply(lsIndex, paste, collapse=","),
-    keep=sapply(lsKeep, paste, collapse=",")))
+  tabstreams <- as.matrix(data.frame(
+    lake = Lakenames,
+    index = sapply(lsIndex, paste, collapse = ","),
+    keep = sapply(lsKeep, paste, collapse = ",")
+  ))
   tabstreams <- apply(tabstreams, 2, format)
 
   # tables
-  othtabs <- list("Input files used."=tabinfiles,
-    "Index and maintained trapping streams for adult sea lamprey."=tabstreams)
+  othtabs <- list(
+    "Input files used." = tabinfiles,
+    "Index and maintained trapping streams for adult sea lamprey." = tabstreams
+  )
 
   # prepare the data for error checking & estimation
-  stream1 <- AIprep(csvDir=DIRECTORY, csvNew=NEWDATARAW,
-    csvOld=STREAMDATAPREV)
-  lake1 <- read.csv(paste(DIRECTORY, LAKEDATAPREV, sep="\\"), as.is=TRUE,
-    header=TRUE)
+  stream1 <- AIprep(
+    csvDir = DIRECTORY, csvNew = NEWDATARAW,
+    csvOld = STREAMDATAPREV
+  )
+  lake1 <- read.csv(paste(DIRECTORY, LAKEDATAPREV, sep = "\\"),
+    as.is = TRUE,
+    header = TRUE
+  )
 
 
 
   ### Error Checking ####
 
   # create error checking report
-  AIcheck(streamDat=stream1, csvDir=DIRECTORY, otherTabs=othtabs)
+  AIcheck(streamDat = stream1, csvDir = DIRECTORY, otherTabs = othtabs)
 
 
 
@@ -128,8 +136,8 @@ AIpresto <- function(DIRECTORY, NEWDATARAW, STREAMDATAPREV, LAKEDATAPREV) {
 
   # generate estimates
   makeitso <- lapply(1:5, function(L) {
-    AIestimate(streamDat=stream1[stream1$lake==L, ], minNMR=2)
-    })
+    AIestimate(streamDat = stream1[stream1$lake == L, ], minNMR = 2)
+  })
   streamcomp <- do.call(rbind, lapply(makeitso, "[[", 1))
   lakecomp <- do.call(rbind, lapply(makeitso, "[[", 2))
 
@@ -137,16 +145,18 @@ AIpresto <- function(DIRECTORY, NEWDATARAW, STREAMDATAPREV, LAKEDATAPREV) {
 
   #### Target Estimation ####
 
-  targ <- AItarget(lakeIndex=lake1)
+  targ <- AItarget(lakeIndex = lake1)
 
 
 
   #### expand indices to supposed lake-wide PEs ####
 
   lakeInd <- plyr::rbind.fill(lake1, lakecomp)
-  lakeIndPE <- merge(lakeInd[, c("lake", "year", "index", "ilo", "ihi")],
-    cbind(lake=1:5, i2pe=index2pe))
-  pes <- lakeIndPE[, c("index", "ilo", "ihi")]*lakeIndPE$i2pe
+  lakeIndPE <- merge(
+    lakeInd[, c("lake", "year", "index", "ilo", "ihi")],
+    cbind(lake = 1:5, i2pe = index2pe)
+  )
+  pes <- lakeIndPE[, c("index", "ilo", "ihi")] * lakeIndPE$i2pe
   names(pes) <- c("pe", "pelo", "pehi")
   lakeIndPE <- cbind(lakeIndPE, pes)
   lakeIndPE <- lakeIndPE[with(lakeIndPE, order(lake, year)), ]
@@ -156,10 +166,12 @@ AIpresto <- function(DIRECTORY, NEWDATARAW, STREAMDATAPREV, LAKEDATAPREV) {
   #### Draft Report ####
 
   # combine estimates with initially provided data
-  streamPE <- plyr::rbind.fill(stream1[stream1$complete==TRUE, ], streamcomp) %>%
+  streamPE <- plyr::rbind.fill(stream1[stream1$complete == TRUE, ], streamcomp) %>%
     arrange(lake, lscode, year)
-  AIreport(streamPEs=streamPE, lakeIPEs=lakeIndPE, targets=targ,
-    csvDir=DIRECTORY, outFile=NULL, proptargets=NULL)
+  AIreport(
+    streamPEs = streamPE, lakeIPEs = lakeIndPE, targets = targ,
+    csvDir = DIRECTORY, outFile = NULL, proptargets = NULL
+  )
 
 
 
@@ -168,10 +180,10 @@ AIpresto <- function(DIRECTORY, NEWDATARAW, STREAMDATAPREV, LAKEDATAPREV) {
   OUTSTREAM <- paste0("AdultStreamThru", YEAR, ".csv")
   OUTLAKE <- paste0("AdultLakeThru", YEAR, ".csv")
   OUTTARG <- paste0("AdultTarget", YEAR, ".csv")
-  write.csv(new, paste(DIRECTORY, STREAMDATANEW, sep="\\"), row.names=FALSE)
-  write.csv(streamPE, paste(DIRECTORY, OUTSTREAM, sep="\\"), row.names=FALSE)
-  write.csv(lakeIndPE, paste(DIRECTORY, OUTLAKE, sep="\\"), row.names=FALSE)
-  write.csv(targ, paste(DIRECTORY, OUTTARG, sep="\\"), row.names=FALSE)
+  write.csv(new, paste(DIRECTORY, STREAMDATANEW, sep = "\\"), row.names = FALSE)
+  write.csv(streamPE, paste(DIRECTORY, OUTSTREAM, sep = "\\"), row.names = FALSE)
+  write.csv(lakeIndPE, paste(DIRECTORY, OUTLAKE, sep = "\\"), row.names = FALSE)
+  write.csv(targ, paste(DIRECTORY, OUTTARG, sep = "\\"), row.names = FALSE)
 
 
 
@@ -180,23 +192,26 @@ AIpresto <- function(DIRECTORY, NEWDATARAW, STREAMDATAPREV, LAKEDATAPREV) {
   message("\n\n", YEAR, " Adult Abundance Estimates in Streams")
   # cat(paste0("\n\n", YEAR, " Adult Abundance Estimates in Streams\n\n"))
   print(format(
-    streamPE[streamPE$year==YEAR,
-      c("lscode", "country", "estr", "strname", "index", "maintain", "year",
-      "trapcatch", "PEmr", "CVmr", "indexContrib", "indexContribCV")]
-    ), row.names=FALSE)
+    streamPE[
+      streamPE$year == YEAR,
+      c(
+        "lscode", "country", "estr", "strname", "index", "maintain", "year",
+        "trapcatch", "PEmr", "CVmr", "indexContrib", "indexContribCV"
+      )
+    ]
+  ), row.names = FALSE)
 
   message("\n\n", YEAR, " Adult Index in Lakes")
-  #cat(paste0("\n\n", YEAR, " Adult Index in Lakes\n\n"))
+  # cat(paste0("\n\n", YEAR, " Adult Index in Lakes\n\n"))
   print(format(
-    lakeIndPE[lakeIndPE$year==YEAR, ]
-    ), row.names=FALSE)
+    lakeIndPE[lakeIndPE$year == YEAR, ]
+  ), row.names = FALSE)
 
   message("\n\n", YEAR, " Adult Targets")
-  #cat(paste0("\n\n", YEAR, " Adult Targets\n\n"))
+  # cat(paste0("\n\n", YEAR, " Adult Targets\n\n"))
   print(format(
     targ
-    ), row.names=FALSE)
+  ), row.names = FALSE)
 
   message("\n\nOutput *.csv and *.doc files in directory ", DIRECTORY, ".\n\n")
-
 }

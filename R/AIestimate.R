@@ -51,8 +51,7 @@
 #' Journal of Great Lakes Research.
 #'  \href{https://doi.org/10.1016/j.jglr.2021.04.009}{[link]}
 
-AIestimate <- function(streamDat, minNMR=2) {
-
+AIestimate <- function(streamDat, minNMR = 2) {
   # keep track of who started off as incomplete
   incomp <- with(streamDat, !complete)
 
@@ -66,18 +65,21 @@ AIestimate <- function(streamDat, minNMR=2) {
   incompiMiss <- with(streamDat, !complete & index & is.na(PEmr))
   if (any(incompiMiss)) {
     sub <- streamDat[streamDat$index, ]
-    indfit <- with(sub,
-      aov(log(PEmr) ~ as.factor(lscode) + as.factor(year), weights=1/CVmr^2)
-      )
+    indfit <- with(
+      sub,
+      aov(log(PEmr) ~ as.factor(lscode) + as.factor(year), weights = 1 / CVmr^2)
+    )
     n.mr <- tapply(!is.na(sub$PEmr), sub$year, sum)
     eyrs <- as.numeric(names(n.mr)[n.mr > (minNMR - 0.5)])
     estimable <- streamDat$year %in% eyrs
     Pmr <- rep(NA, length(estimable))
     CVmr <- Pmr
-    p.sd <- predAntilognorm(modfit=indfit,
-      xdata=streamDat[estimable & streamDat$index, ])
+    p.sd <- predAntilognorm(
+      modfit = indfit,
+      xdata = streamDat[estimable & streamDat$index, ]
+    )
     Pmr[estimable & streamDat$index] <- p.sd$pred
-    CVmr[estimable & streamDat$index] <- 100*p.sd$sdpred/p.sd$pred
+    CVmr[estimable & streamDat$index] <- 100 * p.sd$sdpred / p.sd$pred
     streamDat$indexContrib[incompiMiss] <- Pmr[incompiMiss]
     streamDat$indexContribCV[incompiMiss] <- CVmr[incompiMiss]
   }
@@ -86,32 +88,38 @@ AIestimate <- function(streamDat, minNMR=2) {
   streamDat$complete[incomp] <- TRUE
 
   # arrange estimates in a matrix
-  streamests <- with(streamDat[streamDat$index, ],
-    tapply(indexContrib, list(year, lscode), mean))
-  streamCVs <- with(streamDat[streamDat$index, ],
-    tapply(indexContribCV, list(year, lscode), mean))
+  streamests <- with(
+    streamDat[streamDat$index, ],
+    tapply(indexContrib, list(year, lscode), mean)
+  )
+  streamCVs <- with(
+    streamDat[streamDat$index, ],
+    tapply(indexContribCV, list(year, lscode), mean)
+  )
   # get rid of years with missing estimates
   missyears <- apply(is.na(streamests), 1, any)
-  pe2 <- streamests[!missyears, , drop=FALSE]
-  cv2 <- streamCVs[!missyears, , drop=FALSE]
+  pe2 <- streamests[!missyears, , drop = FALSE]
+  cv2 <- streamCVs[!missyears, , drop = FALSE]
   # THEN, get rid of streams with missing estimates
   missstrs <- apply(is.na(pe2), 2, any)
-  pe3 <- pe2[, !missstrs, drop=FALSE]
-  cv3 <- cv2[, !missstrs, drop=FALSE]
+  pe3 <- pe2[, !missstrs, drop = FALSE]
+  cv3 <- cv2[, !missstrs, drop = FALSE]
   vr <- (cv3 * pe3 / 100)^2
 
   # calculate index with 95% confidence interval
   sumpe <- apply(pe3, 1, sum)
   sumvar <- apply(vr, 1, sum)
   n <- dim(pe3)[2]
-  int <- qt(1-0.05/2, n-1)*sqrt(sumvar)/sqrt(n)
+  int <- qt(1 - 0.05 / 2, n - 1) * sqrt(sumvar) / sqrt(n)
   ilo <- sumpe - int
   ihi <- sumpe + int
-  lakesum <- data.frame(lake=streamDat$lake[1], year=as.numeric(row.names(pe3)),
-    index=sumpe, ilo=ilo, ihi=ihi)
+  lakesum <- data.frame(
+    lake = streamDat$lake[1], year = as.numeric(row.names(pe3)),
+    index = sumpe, ilo = ilo, ihi = ihi
+  )
 
   # subset the output to only include the years that needed new estimates
   streamDatOut <- streamDat[streamDat$year %in% uy, ]
   lakeIndexOut <- lakesum[lakesum$year %in% uy, ]
-  list(streamPE=streamDatOut, lakeIndex=lakeIndexOut)
+  list(streamPE = streamDatOut, lakeIndex = lakeIndexOut)
 }

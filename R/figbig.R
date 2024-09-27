@@ -43,8 +43,9 @@
 #'   rtf
 #' @export
 
-figbig <- function(..., FIG=fig, rtf=doc, figc=GLFCenv$figcount, boldt=TRUE,
-    w=NULL, h=NULL, rf=300, newpage="none", omi=c(1, 1, 1, 1)) {
+figbig <- function(
+    ..., FIG = fig, rtf = doc, figc = GLFCenv$figcount, boldt = TRUE,
+    w = NULL, h = NULL, rf = 300, newpage = "none", omi = c(1, 1, 1, 1)) {
   wf <- if (is.null(w)) {
     9
   } else {
@@ -55,13 +56,13 @@ figbig <- function(..., FIG=fig, rtf=doc, figc=GLFCenv$figcount, boldt=TRUE,
   } else {
     h
   }
-  if (newpage=="none") {
-    addNewLine(this=rtf)
+  if (newpage == "none") {
+    addNewLine(this = rtf)
   }
-  if (newpage=="port") {
-    addPageBreak(this=rtf, width=11, height=17, omi=omi)
+  if (newpage == "port") {
+    addPageBreak(this = rtf, width = 11, height = 17, omi = omi)
   }
-  if (newpage=="land") {
+  if (newpage == "land") {
     wf <- if (is.null(w)) {
       15
     } else {
@@ -72,16 +73,16 @@ figbig <- function(..., FIG=fig, rtf=doc, figc=GLFCenv$figcount, boldt=TRUE,
     } else {
       h
     }
-    addPageBreak(this=rtf, width=17, height=11, omi=omi)
+    addPageBreak(this = rtf, width = 17, height = 11, omi = omi)
   }
-  addPlot(this=rtf, plot.fun=FIG, width=wf, height=hf, res=rf)
-  addNewLine(this=rtf)
-  addNewLine(this=rtf)
-  startParagraph(this=rtf)
-  addText(this=rtf, paste0("Figure ", figc, ". "), bold=boldt)
-  addText(this=rtf, ...)
-  endParagraph(this=rtf)
-  addNewLine(this=rtf)
-  addNewLine(this=rtf)
+  addPlot(this = rtf, plot.fun = FIG, width = wf, height = hf, res = rf)
+  addNewLine(this = rtf)
+  addNewLine(this = rtf)
+  startParagraph(this = rtf)
+  addText(this = rtf, paste0("Figure ", figc, ". "), bold = boldt)
+  addText(this = rtf, ...)
+  endParagraph(this = rtf)
+  addNewLine(this = rtf)
+  addNewLine(this = rtf)
   GLFCenv$figcount <- figc + 1
 }

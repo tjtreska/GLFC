@@ -17,10 +17,10 @@
 #'   rtf
 #' @export
 
-endrtf <- function(rtf=doc, details=TRUE, ...) {
-  if (details==TRUE) {
+endrtf <- function(rtf = doc, details = TRUE, ...) {
+  if (details == TRUE) {
     addPageBreak(rtf, ...)
     addSessionInfo(rtf)
-    }
-  done(rtf)
   }
+  done(rtf)
+}

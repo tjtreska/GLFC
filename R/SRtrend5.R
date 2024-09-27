@@ -29,18 +29,17 @@
 #' rawdat <- data.frame(
 #'   Year = 1990 + c(0:5, 8:9, 2:3, 5:8),
 #'   Type = rep(1:2, c(8, 6)),
-#'   Y = c(1:12, 9, 7)*10
+#'   Y = c(1:12, 9, 7) * 10
 #' )
 #' SRtrend5(rawdat, "Y", "Type", "Year")
-#' SRtrend5(rawdat, "Y", "Type", "Year", lasttime=1995)
-
-SRtrend5 <- function(df, x, group, time, lasttime=NULL) {
+#' SRtrend5(rawdat, "Y", "Type", "Year", lasttime = 1995)
+SRtrend5 <- function(df, x, group, time, lasttime = NULL) {
   df2 <- df
   df2$Fx <- df[[x]]
   df2$Fgroup <- df[[group]]
   df2$Ftime <- df[[time]]
-  look <- tidyr::complete(df2, Fgroup, Ftime=full_seq(Ftime, 1))
-  if(is.null(lasttime)) {
+  look <- tidyr::complete(df2, Fgroup, Ftime = full_seq(Ftime, 1))
+  if (is.null(lasttime)) {
     lasttime <- max(look$Ftime[!is.na(look$Fx)])
   }
   sub <- look %>%
@@ -51,17 +50,17 @@ SRtrend5 <- function(df, x, group, time, lasttime=NULL) {
     ) %>%
     nest(data = -Fgroup) %>%
     mutate(
-      fit = purrr::map(data, ~ lm(Fx ~ Ftime, data=.x)),
+      fit = purrr::map(data, ~ lm(Fx ~ Ftime, data = .x)),
       tidied = purrr::map(fit, broom::tidy)
     ) %>%
     unnest(tidied)
   part1 <- sub %>%
-    filter(term=="Ftime") %>%
-    select(Fgroup, slope=estimate, p.value)
+    filter(term == "Ftime") %>%
+    select(Fgroup, slope = estimate, p.value)
   part2 <- sub %>%
-    filter(term=="(Intercept)") %>%
-    select(Fgroup, int=estimate)
-  both <- full_join(part2, part1, by="Fgroup")
+    filter(term == "(Intercept)") %>%
+    select(Fgroup, int = estimate)
+  both <- full_join(part2, part1, by = "Fgroup")
 
   both[[group]] <- both$Fgroup
   both[[time]] <- lasttime

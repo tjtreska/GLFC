@@ -19,8 +19,7 @@
 #'   \code{\link{colors}}, \code{\link{palette}}.
 #' @examples
 #' x <- 1:10
-#' plot(x, x, pch=16, col=colr(x, "blue", "yellow"), cex=4)
-
+#' plot(x, x, pch = 16, col = colr(x, "blue", "yellow"), cex = 4)
 colr <- function(x, fromcolname, tocolname) {
   # recode x to a specified color range
   from <- col2rgb(fromcolname)
@@ -28,5 +27,5 @@ colr <- function(x, fromcolname, tocolname) {
   red <- plotrix::rescale(x, c(from[1], to[1]))
   green <- plotrix::rescale(x, c(from[2], to[2]))
   blue <- plotrix::rescale(x, c(from[3], to[3]))
-  rgb(red, green, blue, maxColorValue=255)
+  rgb(red, green, blue, maxColorValue = 255)
 }

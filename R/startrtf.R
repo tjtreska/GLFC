@@ -42,33 +42,37 @@
 #' \dontrun{
 #' # open a Word-friendly rtf file
 #' today <- Sys.Date()
-#' doc <- startrtf(file=paste("Example", today))
+#' doc <- startrtf(file = paste("Example", today))
 #' # add headings
 #' heading("Title")
-#' heading(paste("Author", today, sep=" - "), 2)
+#' heading(paste("Author", today, sep = " - "), 2)
 #' # add a paragraph
 #' para("This is how write a paragraph.")
 #' # reference a table
 #' para("This is how you reference a table (Table ", GLFCenv$tabcount, ").")
 #' # add the table
-#' tab <- matrix(sample(20), ncol=5,
-#'  dimnames=list(paste("Row", 1:4), paste("Column", 1:5)))
+#' tab <- matrix(sample(20),
+#'   ncol = 5,
+#'   dimnames = list(paste("Row", 1:4), paste("Column", 1:5))
+#' )
 #' tabl("A silly table.")
 #' # reference a figure
-#' para("And this is how you reference a figure (Figure ",
-#'  GLFCenv$figcount, ").")
+#' para(
+#'   "And this is how you reference a figure (Figure ",
+#'   GLFCenv$figcount, ")."
+#' )
 #' # add the figure
 #' fig <- function() {
-#'   par(mar=c(4, 4, 1, 1))
-#'   plot(1:10, 1:10, xlab="X", ylab="Y")
+#'   par(mar = c(4, 4, 1, 1))
+#'   plot(1:10, 1:10, xlab = "X", ylab = "Y")
 #' }
-#' figu("A silly plot.", h=4, w=4)
+#' figu("A silly plot.", h = 4, w = 4)
 #' # save the rtf file
 #' endrtf()
 #' }
-
-startrtf <- function(file=NULL, dir=getwd(), width=8.5, height=11,
-    omi=c(1, 1, 1, 1), quiet=FALSE) {
+startrtf <- function(
+    file = NULL, dir = getwd(), width = 8.5, height = 11,
+    omi = c(1, 1, 1, 1), quiet = FALSE) {
   # create a new RTF file readable by Word
   # create two new variables to keep count of tables and figures
   GLFCenv$tabcount <- 1
@@ -76,13 +80,13 @@ startrtf <- function(file=NULL, dir=getwd(), width=8.5, height=11,
   if (is.null(file)) {
     file <- paste0("RGeneratedDocument", Sys.Date())
   }
-  dirfiledoc <- if (length(grep(".doc", file))>0) {
-    paste(dir, file, sep="/")
+  dirfiledoc <- if (length(grep(".doc", file)) > 0) {
+    paste(dir, file, sep = "/")
   } else {
-    paste(dir, paste0(file, ".doc"), sep="/")
+    paste(dir, paste0(file, ".doc"), sep = "/")
   }
   if (!quiet) {
     cat(paste0("New RTF document created, ", dirfiledoc, "\n"))
   }
-  RTF(dirfiledoc, width=width, height=height, omi=omi)
+  RTF(dirfiledoc, width = width, height = height, omi = omi)
 }

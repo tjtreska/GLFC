@@ -6,7 +6,7 @@
 #' @param y
 #'   Numeric vector of y coordinates.
 #' @param z
-#'   Numeric vector of data used to inform the radii of the drawn circles.  
+#'   Numeric vector of data used to inform the radii of the drawn circles.
 #'   In general, this should be the square root of the quantity that you want
 #'   to represent, because viewers will tend to judge the circles by their area
 #'   not their radii.
@@ -49,17 +49,18 @@
 #' @export
 #' @examples
 #' circles(trees$Height, trees$Girth, sqrt(trees$Volume),
-#'  data.range=sqrt(c(0, max(trees$Volume))), circle.size.range=c(0, 0.3),
-#'  xlab="Height (ft)", ylab="Diameter (in)", main="Tree Volume")
-
-circles <- function(x, y, z, data.range=range(z, na.rm=TRUE),
-    circle.size.range=c(0.1, 1), outx=NA, outy=NA, add=FALSE,
-    xlim=NULL, ylim=NULL, ...) {
+#'   data.range = sqrt(c(0, max(trees$Volume))), circle.size.range = c(0, 0.3),
+#'   xlab = "Height (ft)", ylab = "Diameter (in)", main = "Tree Volume"
+#' )
+circles <- function(
+    x, y, z, data.range = range(z, na.rm = TRUE),
+    circle.size.range = c(0.1, 1), outx = NA, outy = NA, add = FALSE,
+    xlim = NULL, ylim = NULL, ...) {
   # control the plotting of circles
   # fix the data range to be plotted (data.range)
   # and fix the corresponding range of circle sizes (circle.size.range)
   # rescale data range so it matches circle size range
-  newz <- ((z - data.range[1])/diff(data.range)) * diff(circle.size.range) +
+  newz <- ((z - data.range[1]) / diff(data.range)) * diff(circle.size.range) +
     circle.size.range[1]
   # add two data points that plot the min and max circle sizes
   #   outside the plot area
@@ -74,12 +75,16 @@ circles <- function(x, y, z, data.range=range(z, na.rm=TRUE),
   addz <- c(newz, circle.size.range)
   # plot the circles
   if (add) {
-    symbols(addx, addy, circles=addz, inches=circle.size.range[2],
-      add=TRUE, ...)
+    symbols(addx, addy,
+      circles = addz, inches = circle.size.range[2],
+      add = TRUE, ...
+    )
   } else {
-    if (is.null(xlim)) xlim <- extendrange(x, f=0.1)
-    if (is.null(ylim)) ylim <- extendrange(y, f=0.1)
-    symbols(addx, addy, xlim=xlim, ylim=ylim, circles=addz,
-      inches=circle.size.range[2], add=FALSE, ...)
+    if (is.null(xlim)) xlim <- extendrange(x, f = 0.1)
+    if (is.null(ylim)) ylim <- extendrange(y, f = 0.1)
+    symbols(addx, addy,
+      xlim = xlim, ylim = ylim, circles = addz,
+      inches = circle.size.range[2], add = FALSE, ...
+    )
   }
 }

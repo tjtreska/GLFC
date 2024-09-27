@@ -76,52 +76,62 @@
 #' @import readxl
 #' @export
 
-DWEFprep <- function(Dir, CatchFile, LengthsFile, PlotsFile, TRTtiming="AFTER",
-  CatchHist, LengthHist, PlotHist, PEHist, b4plots=NULL) {
-
+DWEFprep <- function(
+    Dir, CatchFile, LengthsFile, PlotsFile, TRTtiming = "AFTER",
+    CatchHist, LengthHist, PlotHist, PEHist, b4plots = NULL) {
   # treatment timing
   tt <- casefold(substring(TRTtiming, 1, 1))
-  if(tt=="m" & is.null(b4plots)) stop('If some plots were surveyed',
-    ' before and some plots were surveyed after treatment,',
-    ' TRTtiming="MIXED", then b4plots should identify the plots that were',
-    ' surveyed BEFORE they were treated, e.g., b4plots=c(18, 39, 112).')
-  if(tt!="m" & !is.null(b4plots)) stop('No plot numbers should be provided',
-    ' for b4plots unless TRTtiming="MIXED".')
+  if (tt == "m" & is.null(b4plots)) {
+    stop(
+      "If some plots were surveyed",
+      " before and some plots were surveyed after treatment,",
+      ' TRTtiming="MIXED", then b4plots should identify the plots that were',
+      " surveyed BEFORE they were treated, e.g., b4plots=c(18, 39, 112)."
+    )
+  }
+  if (tt != "m" & !is.null(b4plots)) {
+    stop(
+      "No plot numbers should be provided",
+      ' for b4plots unless TRTtiming="MIXED".'
+    )
+  }
   PERIOD <- GLFC::recode(tt, c("n", "a", "b", "m"), c(0, 1, -1, NA))
 
   # bring in lengths data
   lens <- vector("list", length(LengthsFile))
-  for(i in seq(length(lens))) {
+  for (i in seq(length(lens))) {
     filei <- LengthsFile[i]
-    if(length(grep("\\.xl", filei, ignore.case=TRUE))==1) {
-      lens[[i]] <- read_excel(paste(Dir, filei, sep="/"), sheet=1)
-      } else {
+    if (length(grep("\\.xl", filei, ignore.case = TRUE)) == 1) {
+      lens[[i]] <- read_excel(paste(Dir, filei, sep = "/"), sheet = 1)
+    } else {
       stop("LengthsFile file must be file type *.XLS*")
-      }
     }
+  }
   lens <- do.call(rbind, lens)
   names(lens) <- casefold(names(lens))
   lens <- lens[!is.na(lens$length), ]
   lens$sampid <- as.numeric(lens$sampid)
   lens$id <- as.numeric(lens$id)
   lens$length <- as.numeric(lens$length)
-  lens$sl.larv.n <- ifelse(lens$class=="A", 1, 0)
-  lens$sl.meta.n <- ifelse(lens$class=="T", 1, 0)
+  lens$sl.larv.n <- ifelse(lens$class == "A", 1, 0)
+  lens$sl.meta.n <- ifelse(lens$class == "T", 1, 0)
   # calculate catch adjusted for length-based gear efficiency
-  lens$sl.larv.adj = ifelse(lens$class=="A", DWEFgec(lens$length), 0)
-  lens$sl.meta.adj = ifelse(lens$class=="T", DWEFgec(lens$length), 0)
+  lens$sl.larv.adj <- ifelse(lens$class == "A", DWEFgec(lens$length), 0)
+  lens$sl.meta.adj <- ifelse(lens$class == "T", DWEFgec(lens$length), 0)
   larvtots <- aggregate(cbind(sl.larv.n, sl.larv.adj, sl.meta.n, sl.meta.adj) ~
-      sampid, data=lens, sum)
-  lvarnamz <- c("sampid", "class", "length", "sl.larv.n", "sl.larv.adj",
-    "sl.meta.n", "sl.meta.adj")
+    sampid, data = lens, sum)
+  lvarnamz <- c(
+    "sampid", "class", "length", "sl.larv.n", "sl.larv.adj",
+    "sl.meta.n", "sl.meta.adj"
+  )
 
   # bring in catch data
-  if(length(grep("\\.xl", filei, ignore.case=TRUE))==1) {
-    fin <- read_excel(paste(Dir, CatchFile, sep="/"), sheet=1)
-    } else {
+  if (length(grep("\\.xl", filei, ignore.case = TRUE)) == 1) {
+    fin <- read_excel(paste(Dir, CatchFile, sep = "/"), sheet = 1)
+  } else {
     stop("CatchFile file must be file type *.XLS*")
-    }
-  names(fin) <- make.names(casefold(names(fin)), unique=TRUE, allow_=FALSE)
+  }
+  names(fin) <- make.names(casefold(names(fin)), unique = TRUE, allow_ = FALSE)
   gps <- strsplit(fin$gpsdate, "/")
 
   # sometimes date is entered as month first, other times day first,
@@ -130,11 +140,11 @@ DWEFprep <- function(Dir, CatchFile, LengthsFile, PlotsFile, TRTtiming="AFTER",
   d2 <- as.numeric(lapply(gps, "[", 2))
   # when a date field is greater than 12,
   # that is an indication that the field is NOT the MONTH (nm)
-  nm1 <- d1>12
-  nm2 <- d2>12
+  nm1 <- d1 > 12
+  nm2 <- d2 > 12
   boat <- fin$boat
-  bd <- aggregate(cbind(nm1, nm2) ~ boat, FUN=mean, na.rm=TRUE)
-  fin <- merge(fin, bd, all.x=TRUE)
+  bd <- aggregate(cbind(nm1, nm2) ~ boat, FUN = mean, na.rm = TRUE)
+  fin <- merge(fin, bd, all.x = TRUE)
   fin$dd <- ifelse(fin$nm1 > fin$nm2, d1, d2)
   fin$mm <- ifelse(fin$nm1 > fin$nm2, d2, d1)
 
@@ -147,65 +157,82 @@ DWEFprep <- function(Dir, CatchFile, LengthsFile, PlotsFile, TRTtiming="AFTER",
   fin$cluster <- miss
   fin$plot.num <- miss
   fin$comment[is.na(fin$comment)] <- "No comment"
-  fin$commentwrap <- sapply(strwrap(fin$comment, width=30, simplify=FALSE),
-    paste, collapse="\n")
+  fin$commentwrap <- sapply(strwrap(fin$comment, width = 30, simplify = FALSE),
+    paste,
+    collapse = "\n"
+  )
 
   # if inbplot column is called inplot, change it
-  if("inplot" %in% names(fin)) fin$inbplot <- fin$inplot
+  if ("inplot" %in% names(fin)) fin$inbplot <- fin$inplot
 
-  fin2 <- merge(fin, larvtots, all=TRUE)
+  fin2 <- merge(fin, larvtots, all = TRUE)
   rm(gps, d1, d2, nm1, nm2, boat, bd, miss, larvtots)
 
   # determine year of interest
-  if(var(fin2$year, na.rm=TRUE)>0) {
-    stop(paste("CatchFile data contains more than one year of data:",
-      sort(unique(fin2$year))))
-    }
+  if (var(fin2$year, na.rm = TRUE) > 0) {
+    stop(paste(
+      "CatchFile data contains more than one year of data:",
+      sort(unique(fin2$year))
+    ))
+  }
 
   # bring in plot information
-  if(length(grep("\\.xl", filei, ignore.case=TRUE))==1) {
-    plotinfo <- read_excel(paste(Dir, PlotsFile, sep="/"), sheet=1)
-    } else {
+  if (length(grep("\\.xl", filei, ignore.case = TRUE)) == 1) {
+    plotinfo <- read_excel(paste(Dir, PlotsFile, sep = "/"), sheet = 1)
+  } else {
     stop("Plot information file must be file type *.XLS*")
-    }
+  }
   orig.names <- names(plotinfo)
-  names(plotinfo) <- make.names(casefold(names(plotinfo)), unique=TRUE,
-    allow_=FALSE)
+  names(plotinfo) <- make.names(casefold(names(plotinfo)),
+    unique = TRUE,
+    allow_ = FALSE
+  )
   plotinfo$new.numb <- plotinfo$plot.09
   treatvarname <- names(plotinfo)[grep("treat", names(plotinfo))]
   plotinfo$trtd <- plotinfo[[treatvarname]]
   plotinfo$area.ha <- plotinfo$area
-  area.treated <- sum(plotinfo$area.ha[plotinfo$trtd==1])
-  plotinfo2 <- aggregate(trtd ~ area.ha + new.numb, data=plotinfo, FUN=sum)
+  area.treated <- sum(plotinfo$area.ha[plotinfo$trtd == 1])
+  plotinfo2 <- aggregate(trtd ~ area.ha + new.numb, data = plotinfo, FUN = sum)
 
-  varnamz <- c("year", "mm", "dd", "stime", "period", "sampid", "transamp",
+  varnamz <- c(
+    "year", "mm", "dd", "stime", "period", "sampid", "transamp",
     "transect", "site", "boat", "latitude", "longitude", "region", "label",
     "inbplot", "plot.num", "new.numb", "sample", "cluster", "depth", "hab.type",
     "sub.major", "sub.minor1", "sub.minor2", "ab.total", "i.total", "sl.total",
-    "comment", "commentwrap")
+    "comment", "commentwrap"
+  )
   rm(orig.names, treatvarname, filei)
 
   # if plot numbers were entered, make sure they make sense
-  if(is.na(PERIOD)) {
+  if (is.na(PERIOD)) {
     check <- match(b4plots, fin2$new.numb)
-    if(sum(is.na(check))>0) stop(paste(
-      "No catch data corresponds to the hotspots numbers you provided:",
-      b4plots[is.na(check)]))
-    fin2$period <- ifelse(fin2$new.numb %in% b4plots, -1, 1)
-    } else {
-    fin2$period <- PERIOD
+    if (sum(is.na(check)) > 0) {
+      stop(paste(
+        "No catch data corresponds to the hotspots numbers you provided:",
+        b4plots[is.na(check)]
+      ))
     }
+    fin2$period <- ifelse(fin2$new.numb %in% b4plots, -1, 1)
+  } else {
+    fin2$period <- PERIOD
+  }
 
 
   # any variable names missing?
   missvar.c <- varnamz[is.na(match(varnamz, names(fin2)))]
-  if(length(missvar.c)>0) stop(paste(
-    "CatchFile is missing required variable(s):",
-    paste(missvar.c, collapse=", ")))
+  if (length(missvar.c) > 0) {
+    stop(paste(
+      "CatchFile is missing required variable(s):",
+      paste(missvar.c, collapse = ", ")
+    ))
+  }
   missvar.l <- lvarnamz[is.na(match(lvarnamz, names(lens)))]
-  if(length(missvar.l)>0) stop(paste(
-    "LengthsFile is missing required variable(s):",
-    paste(missvar.l, collapse=", ")))
+  if (length(missvar.l) > 0) {
+    stop(paste(
+      "LengthsFile is missing required variable(s):",
+      paste(missvar.l, collapse = ", ")
+    ))
+  }
 
   # create data frames with just the specified variable names
   smr <- fin2[, varnamz]
@@ -217,40 +244,41 @@ DWEFprep <- function(Dir, CatchFile, LengthsFile, PlotsFile, TRTtiming="AFTER",
   list.time <- strsplit(smr$stime, ":")
   smr$hr <- as.numeric(sapply(list.time, "[", 1))
   smr$mn <- as.numeric(sapply(list.time, "[", 2))
-  smr$dec.time <- smr$hr + smr$mn/60
-  smr$stime <- 100*smr$hr + smr$mn
+  smr$dec.time <- smr$hr + smr$mn / 60
+  smr$stime <- 100 * smr$hr + smr$mn
   smr$date <- rep(NA, dim(smr)[1])
   sel <- !is.na(smr$year)
   smr$date[sel] <- as.Date(paste(smr$year[sel], smr$mm[sel], smr$dd[sel],
-    sep="-"))
+    sep = "-"
+  ))
   class(smr$date) <- "Date"
-  row.names(smr) <- 1+(1:dim(smr)[1])
+  row.names(smr) <- 1 + (1:dim(smr)[1])
   smr <- smr[order(smr$boat, smr$date, smr$dec.time), ]
   rm(list.time, sel, i)
 
   # read in historic data
-  ch <- read.csv(paste(Dir, CatchHist, sep="/"))
-  lh <- read.csv(paste(Dir, LengthHist, sep="/"))
-  ph <- read.csv(paste(Dir, PlotHist, sep="/"))
-  rh <- read.csv(paste(Dir, PEHist, sep="/"))
+  ch <- read.csv(paste(Dir, CatchHist, sep = "/"))
+  lh <- read.csv(paste(Dir, LengthHist, sep = "/"))
+  ph <- read.csv(paste(Dir, PlotHist, sep = "/"))
+  rh <- read.csv(paste(Dir, PEHist, sep = "/"))
 
   list(
-    CAT=smr,
-    LEN=lens,
-    PLT=plotinfo2,
-    CAThist=ch,
-    LENhist=lh,
-    Plothist=ph,
-    PEhist=rh,
-    SOURCE=c(
-      Dir=Dir,
-      CatchFile=CatchFile,
-      LengthsFile=paste(LengthsFile, collapse=", "),
-      PlotsFile=PlotsFile,
-      CatchHist=CatchHist,
-      LengthHist=LengthHist,
-      PlotHist=PlotHist,
-      PEHist=PEHist
+    CAT = smr,
+    LEN = lens,
+    PLT = plotinfo2,
+    CAThist = ch,
+    LENhist = lh,
+    Plothist = ph,
+    PEhist = rh,
+    SOURCE = c(
+      Dir = Dir,
+      CatchFile = CatchFile,
+      LengthsFile = paste(LengthsFile, collapse = ", "),
+      PlotsFile = PlotsFile,
+      CatchHist = CatchHist,
+      LengthHist = LengthHist,
+      PlotHist = PlotHist,
+      PEHist = PEHist
     )
   )
 }

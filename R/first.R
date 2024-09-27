@@ -11,8 +11,7 @@
 #' @export
 #' @examples
 #' first(c(1, 2, 1, 2, 2, 1, 1, 3))
-
 first <- function(x) {
   l <- length(x)
-  c(1, 1-(x[-1]==x[-l]))
+  c(1, 1 - (x[-1] == x[-l]))
 }

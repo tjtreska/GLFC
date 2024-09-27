@@ -40,9 +40,7 @@
 #'
 #' @examples
 #' DWEFage(c(120, 76, 39))
-
-DWEFage <- function(JustLens, LenFreq=rep(1, length(JustLens)), AgeLenKey=NULL) {
-
+DWEFage <- function(JustLens, LenFreq = rep(1, length(JustLens)), AgeLenKey = NULL) {
   #### 0 - definition of variables ####
 
   # n - number of individuals in a sample
@@ -56,8 +54,8 @@ DWEFage <- function(JustLens, LenFreq=rep(1, length(JustLens)), AgeLenKey=NULL) 
 
   #### 1 - initial values ####
 
-  old_likely <- 0  # small likelihood to start
-  likely_diff <- 10  # large difference to start
+  old_likely <- 0 # small likelihood to start
+  likely_diff <- 10 # large difference to start
   step <- 0
   nero <- 1e-4
 
@@ -65,18 +63,19 @@ DWEFage <- function(JustLens, LenFreq=rep(1, length(JustLens)), AgeLenKey=NULL) 
   #### 2 - set up arrays, etc ####
 
   # 7 ages, 31 length bins, 2 samples
-  n <- array(0, dim=c(7, 31, 2))
-  new_n <- array(0, dim=c(7, 31))
+  n <- array(0, dim = c(7, 31, 2))
+  new_n <- array(0, dim = c(7, 31))
 
 
   #### 3 - create aged sample from data ####
 
   # provide default data if no new data is given
-  if(is.null(AgeLenKey)) {
+  if (is.null(AgeLenKey)) {
     AgeLenKey <- tibble(
       Year = rep(1993:2001, c(57, 55, 15, 35, 0, 35, 77, 122, 108)),
       Specimen.State = rep(c("Frozen", "Fresh"), c(162, 342)),
-      Length = c(27, 31, 31, 32, 32, 36, 39, 39, 42, 44, 45, 45, 45, 47, 50,
+      Length = c(
+        27, 31, 31, 32, 32, 36, 39, 39, 42, 44, 45, 45, 45, 47, 50,
         51, 51, 53, 53, 56, 60, 60, 62, 63, 64, 65, 65, 66, 66, 68, 70,
         71, 73, 78, 79, 80, 83, 84, 87, 88, 89, 91, 95, 96, 115, 118,
         118, 121, 122, 125, 125, 126, 127, 129, 132, 146, 153, 21, 28,
@@ -110,8 +109,10 @@ DWEFage <- function(JustLens, LenFreq=rep(1, length(JustLens)), AgeLenKey=NULL) 
         51, 51, 51, 52, 52, 52, 52, 52, 54, 54, 55, 55, 58, 58, 59, 61,
         62, 64, 65, 66, 66, 67, 67, 71, 72, 73, 73, 74, 75, 76, 76, 77,
         81, 83, 85, 85, 88, 90, 94, 97, 100, 101, 102, 103, 103, 105,
-        107, 110, 111, 112, 114, 117, 131, 134, 137, 139),
-      Age = c(1, 1, 1, 1, 1, 2, 1, 2, 2, 1, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2,
+        107, 110, 111, 112, 114, 117, 131, 134, 137, 139
+      ),
+      Age = c(
+        1, 1, 1, 1, 1, 2, 1, 2, 2, 1, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2,
         2, 3, 1, 2, 2, 2, 2, 1, 2, 2, 2, 3, 2, 3, 4, 3, 4, 2, 2, 2, 3,
         2, 4, 4, 4, 2, 4, 4, 3, 3, 4, 4, 4, 5, 5, 3, 4, 2, 1, 2, 2, 3,
         2, 2, 2, 3, 1, 4, 3, 3, 4, 2, 3, 2, 4, 4, 3, 3, 4, 2, 3, 4, 4,
@@ -135,27 +136,28 @@ DWEFage <- function(JustLens, LenFreq=rep(1, length(JustLens)), AgeLenKey=NULL) 
         2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 2, 1, 2, 1, 2, 1,
         2, 2, 2, 3, 5, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 3, 3,
         3, 4, 3, 3, 3, 4, 4, 4, 3, 4, 4, 3, 4, 3, 4, 3, 4, 4, 4, 4, 5,
-        5)
+        5
+      )
     )
   }
 
   # length bins
   bin_levels <- c(0, seq(20, 165, 5), 200)
 
-  AgeLenKey$Lenbins <- cut(AgeLenKey$Length, breaks=bin_levels, labels=FALSE)
+  AgeLenKey$Lenbins <- cut(AgeLenKey$Length, breaks = bin_levels, labels = FALSE)
 
   # cross-tab of Ages and Length Bins
   lenage_key <- table(AgeLenKey$Age, AgeLenKey$Lenbins)
 
   # add actual data to n[age, lenbin, 1] - sample 1
-  n[ , , 1] <- lenage_key[, 1:31]
+  n[, , 1] <- lenage_key[, 1:31]
 
 
   #### 4 - read in data for second sample ####
 
   # length frequency w/out ages, sample 2
   Lens.long <- rep(JustLens, LenFreq)
-  Lens.bins <- cut(Lens.long, breaks=bin_levels)
+  Lens.bins <- cut(Lens.long, breaks = bin_levels)
   curr_lengths <- as.numeric(table(Lens.bins))
   curr_lengths[curr_lengths < nero] <- nero
 
@@ -164,29 +166,31 @@ DWEFage <- function(JustLens, LenFreq=rep(1, length(JustLens)), AgeLenKey=NULL) 
 
   for (i in 1:7) {
     for (j in 1:31) {
-      n[i, j, 2] <- curr_lengths[j] * n[i, j, 1]/colSums(n[ , , 1])[j]
-    }}
+      n[i, j, 2] <- curr_lengths[j] * n[i, j, 1] / colSums(n[, , 1])[j]
+    }
+  }
 
 
   #### 6 - enter iterative loop ####
 
   while (likely_diff > 1e-4) {
     # M step
-    P <- (n[ , , 1] + n[ , , 2]) /
-      (rowSums(n[ , , 1]) + rowSums(n[ , , 2],) + 1e-6)
-    a <- rowSums(n[ , , 2]) / (sum(n[ , , 2]) + 1e-6)
+    P <- (n[, , 1] + n[, , 2]) /
+      (rowSums(n[, , 1]) + rowSums(n[, , 2], ) + 1e-6)
+    a <- rowSums(n[, , 2]) / (sum(n[, , 2]) + 1e-6)
 
     # E step
     for (i in 1:7) {
       for (j in 1:31) {
-        new_n[i, j] <- P[i, j] * rowSums(n[ , , 2])[i] * colSums(n[, , 2])[j] /
-          (colSums(P * rowSums(n[ , , 2]))[j] + 1e-6)
-      }}
-    n[ , , 2] <- new_n
+        new_n[i, j] <- P[i, j] * rowSums(n[, , 2])[i] * colSums(n[, , 2])[j] /
+          (colSums(P * rowSums(n[, , 2]))[j] + 1e-6)
+      }
+    }
+    n[, , 2] <- new_n
 
     # Likelihood step
-    x1 <- sum((n[ , , 1] + n[ , , 2]) * log(P + 1e-6))
-    x2 <- sum(rowSums(n[ , , 2]) * log(a + 1e-6))
+    x1 <- sum((n[, , 1] + n[, , 2]) * log(P + 1e-6))
+    x2 <- sum(rowSums(n[, , 2]) * log(a + 1e-6))
     likely <- x1 + x2
 
     # get difference in likelihood from last time
@@ -195,13 +199,12 @@ DWEFage <- function(JustLens, LenFreq=rep(1, length(JustLens)), AgeLenKey=NULL) 
     step <- step + 1
   }
 
-  adjust <- sum(LenFreq)/sum(new_n)
+  adjust <- sum(LenFreq) / sum(new_n)
 
-  out.m <- adjust*new_n
+  out.m <- adjust * new_n
   dimnames(out.m) <- list(1:7, names(table(Lens.bins)))
 
-  out.v <- adjust*rowSums(new_n)
+  out.v <- adjust * rowSums(new_n)
 
-  return(list(AgeLenFreq=out.m, AgeFreq=out.v))
-
+  return(list(AgeLenFreq = out.m, AgeFreq = out.v))
 }

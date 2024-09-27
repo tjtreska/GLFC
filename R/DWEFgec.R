@@ -29,10 +29,10 @@
 #' @examples
 #' catch <- 1:6
 #' lenmm <- seq(80, 180, 20)
-#' adjcatch <- catch*DWEFgec(lenmm)
+#' adjcatch <- catch * DWEFgec(lenmm)
 #' cbind(catch, lenmm, adjcatch)
 #'
 DWEFgec <- function(llengthmm) {
-  if(!is.numeric(llengthmm)) stop("llengthmm must be a numeric vector")
+  if (!is.numeric(llengthmm)) stop("llengthmm must be a numeric vector")
   1 + exp(0.0229 * llengthmm - 1.732)
 }

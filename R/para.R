@@ -22,9 +22,9 @@
 #'   rtf
 #' @export
 
-para <- function(..., rtf=doc, bold=FALSE, italic=FALSE) {
-  startParagraph(this=rtf)
-  addText(this=rtf, ..., bold=bold, italic=italic)
-  endParagraph(this=rtf)
-  addNewLine(this=rtf)
-  }
+para <- function(..., rtf = doc, bold = FALSE, italic = FALSE) {
+  startParagraph(this = rtf)
+  addText(this = rtf, ..., bold = bold, italic = italic)
+  endParagraph(this = rtf)
+  addNewLine(this = rtf)
+}
